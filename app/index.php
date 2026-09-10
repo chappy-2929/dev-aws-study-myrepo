@@ -102,7 +102,7 @@ $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
       <p style="color: var(--text-muted);">Terraform-ECS-WordPress ハンズオン完了記念</p>
     </div>
 
-    <!-- ステータスパラメータ -->
+    <!-- ステータス -->
     <div class="card">
       <h2>PLAYER PARAMETERS</h2>
       <div class="param-bar">
