@@ -99,7 +99,7 @@ $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
           <h1>Cloud Architect Status</h1>
         </div>
       </div>
-      <p style="color: var(--text-muted);">Terraform × ECS × WordPress ハンズオン完了記念ボード</p>
+      <p style="color: var(--text-muted);">Terraform-ECS-WordPress ハンズオン完了記念</p>
     </div>
 
     <!-- ステータスパラメータ -->
