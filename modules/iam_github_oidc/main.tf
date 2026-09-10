@@ -1,5 +1,4 @@
-# GitHub OIDC プロバイダー（AWS アカウント内に 1 つだけ存在していれば再利用可能）
-# 既存の有無に対応するため data 参照 or 新規作成を考慮
+# GitHub OIDC プロバイダー
 data "tls_certificate" "github" {
   url = "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
 }
@@ -26,13 +25,16 @@ resource "aws_iam_role" "github_actions" {
         Principal = {
           Federated = aws_iam_openid_connect_provider.github.arn
         }
-        Action = "sts:AssumeRoleWithWebIdentity"
+        Action = [
+          "sts:AssumeRoleWithWebIdentity",
+          "sts:TagSession"
+        ]
         Condition = {
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            # 特定のリポジトリの mainブランチからのpushのみを許可
+            # 特定のリポジトリからの実行を許可
             "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:*"
           }
         }
@@ -67,7 +69,7 @@ resource "aws_iam_policy" "deploy_policy" {
         ]
         Resource = var.ecr_repository_arn
       },
-      # ECSタスク定義の登録・サービス更新権限
+      # ECS タスク定義の登録・サービス更新権限
       {
         Effect = "Allow"
         Action = [
@@ -84,7 +86,7 @@ resource "aws_iam_policy" "deploy_policy" {
         Action = [
           "iam:PassRole"
         ]
-        Resource = "arn:aws:iam::*:role/*-ecs-task-*-role"
+        Resource = "arn:aws:iam::*:role/*-role-ecs-task-*"
       }
     ]
   })
