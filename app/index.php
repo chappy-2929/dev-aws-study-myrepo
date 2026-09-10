@@ -123,7 +123,7 @@ $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
       </div>
     </div>
 
-    <!-- コンテナ / インフラ稼働情報 -->
+    <!-- コンテナ/インフラ稼働情報 -->
     <div class="card">
       <h2>RUNTIME TELEMETRY</h2>
       <div class="status-grid">
