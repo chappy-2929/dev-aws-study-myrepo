@@ -1,0 +1,9 @@
+env                 = "dev"
+aws_region          = "ap-northeast-1"
+vpc_cidr            = "10.100.0.0/21"
+availability_zones  = ["ap-northeast-1a", "ap-northeast-1c"]
+public_subnet_cidrs = ["10.100.0.0/24", "10.100.1.0/24"]
+private_subnet_cidrs = ["10.100.2.0/24", "10.100.3.0/24"]
+db_password = "xxxxxxxxxxxxx" # RDSパスワード
+domain_name = "xxxxxxxxxxxxxxx" #　ドメイン名(xxx.chappy-test.click)
+github_repository = "xxxxxxxxxxxxxxxxxx" # Githubリポジトリ名
