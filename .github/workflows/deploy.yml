@@ -17,7 +17,7 @@ env:
   CONTAINER_NAME: wordpress
 
 permissions:
-  id-token: write # AWS OIDC認証に必須
+  id-token: write # AWS OIDC 認証に必須
   contents: read
 
 jobs:
@@ -29,19 +29,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # AWS 認証（アクセスキー不要の OIDC認証）
+      # AWS認証（アクセスキー不要のOIDC認証）
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+          role-skip-session-tagging: true
 
       # Amazon ECRへのログイン
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Dockerイメージのビルドと ECRへのpush
+      # DockerイメージのビルドとECRへのpush
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
@@ -53,7 +55,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      # 最新の ECSタスク定義を取得
+      # 最新のECSタスク定義を取得
       - name: Download Task Definition
         run: |
           aws ecs describe-task-definition --task-definition ${{ env.ECS_TASK_DEFINITION }} --query taskDefinition > task-definition.json
