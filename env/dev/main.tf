@@ -112,8 +112,24 @@ module "iam_github_oidc" {
   source = "../../modules/iam_github_oidc"
 
   github_repository  = var.github_repository
-  role_name          = "${local.name_prefix}-iam-role-github-actions"
+  role_name          = "${local.name_prefix}-role-github-actions"
   ecr_repository_arn = module.ecr.repository_arn
   ecs_cluster_arn    = module.ecs.cluster_name
   ecs_service_arn    = module.ecs.service_name
+}
+
+# ==============================================================================
+# Codepipeline
+# ==============================================================================
+module "codepipeline" {
+  source = "../../modules/codepipeline"
+
+  name_prefix          = local.name_prefix
+  ecr_repository_arn   = module.ecr.repository_arn
+  ecr_repository_url   = module.ecr.repository_url
+  container_name       = "wordpress"
+  github_repository_id = "chappy-2929/dev-aws-study-myrepo"
+  github_branch        = "main"
+  ecs_cluster_name     = module.ecs.cluster_name
+  ecs_service_name     = module.ecs.service_name
 }
