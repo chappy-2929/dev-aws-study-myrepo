@@ -125,7 +125,7 @@ resource "aws_codebuild_project" "main" {
   }
 }
 
-# CodePipeline 用 IAM ロール & ポリシー（ECS権限・PassRoleを修正）
+# CodePipeline 用 IAM ロール & ポリシー
 resource "aws_iam_role" "codepipeline" {
   name = "${var.name_prefix}-role-codepipeline"
 
@@ -212,6 +212,7 @@ resource "aws_codepipeline" "main" {
     type     = "S3"
   }
 
+  # Stage 1: Source (GitHub)
   stage {
     name = "Source"
 
@@ -227,10 +228,12 @@ resource "aws_codepipeline" "main" {
         ConnectionArn    = aws_codestarconnections_connection.github.arn
         FullRepositoryId = var.github_repository_id
         BranchName       = var.github_branch
+        DetectChanges    = "true" # Git Push検知による自動トリガーを有効化
       }
     }
   }
 
+  # Stage 2: Build (CodeBuild / ECR Push)
   stage {
     name = "Build"
 
@@ -249,6 +252,7 @@ resource "aws_codepipeline" "main" {
     }
   }
 
+  # Stage 3: 手動承認ステージ
   stage {
     name = "Approval"
 
@@ -265,6 +269,7 @@ resource "aws_codepipeline" "main" {
     }
   }
 
+  # Stage 4: Deploy (ECS Rolling Update)
   stage {
     name = "Deploy"
 
