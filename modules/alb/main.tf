@@ -22,7 +22,7 @@ resource "aws_lb_target_group" "main" {
   # WordPress のヘルスチェック設定
   # 初期状態やリダイレクトを考慮し 200, 301, 302 を正常判定とする
   health_check {
-    path                = "/wp-includes/images/blank.gif"
+    path                = "/status.php"
     protocol            = "HTTP"
     port                = "traffic-port"
     interval            = 30
