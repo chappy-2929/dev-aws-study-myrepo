@@ -15,29 +15,29 @@ if (strpos($uri, 'status.php') !== false) {
 // ==============================================================================
 $PROFILE = [
     'player_name'  => 'CHAPPY-2929',
-    'badge_role'   => 'Cloud Engineer',
-    'status_badge' => 'All AWS Certifications Engineer',
+    'badge_role'   => 'All AWS Certifications Engineer',
+    'status_badge' => 'OPERATIONAL 100%',
     
     // アバター画像URL
     'avatar_url'   => 'https://github.com/chappy-2929.png',
     
     // 自己紹介 / 達成コメント
-    'bio'          => "Terraform × ECS Fargate × GitHub Actions OIDC 完全制覇！\n強固なIAM信頼ポリシーと完全自動化パイプラインで、ゼロタッチデプロイ環境を完備。",
+    'bio'          => "Terraform × ECS Fargate × GitHub Actions OIDC 完全制覇！\n強固なIAM信頼ポリシーと完全自動化パイプラインで、ゼロタッチデプロイ環境を完備。\nAWS勉強会の講師として日々奮闘中の26歳。\n3月に👶産まれたよ。",
     
-    // 6角形レーダーチャート（文字長を考慮した短縮表記で綺麗に収めます）
+    // 6角形レーダーチャートのパラメータ
     'parameters'   => [
         'IaC (Terraform)'   => 92,
         'AWS Architecture'  => 88,
-        'Docker Container'  => 70,
-        'CI/CD Automation'  => 75,
+        'Docker Container'  => 82,
+        'CI/CD Automation'  => 96,
         'IAM & Security'    => 90,
-        'Troubleshooting'   => 80, // 不動のフルスペック
+        'Troubleshooting'   => 100,
     ],
     
     // テレメトリスペック
-    'environment'  => 'AWS ECS Fargate',
+    'environment'  => 'AWS ECS Fargate (ap-northeast-1)',
     'db_engine'    => 'Amazon RDS MySQL',
-    'load_balancer'=> 'Application Load Balancer',
+    'load_balancer'=> 'Application Load Balancer (Active)',
 ];
 
 $chart_labels = json_encode(array_keys($PROFILE['parameters']), JSON_UNESCAPED_UNICODE);
@@ -50,6 +50,7 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($PROFILE['player_name']); ?> | Cloud Telemetry Hub</title>
     
+    <!-- Cyber Hexagon Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50 3, 90 25, 90 75, 50 97, 10 75, 10 25' fill='%23050b14' stroke='%2338bdf8' stroke-width='6'/><polygon points='50 20, 75 35, 75 65, 50 80, 25 65, 25 35' fill='%2338bdf8'/></svg>">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -59,11 +60,10 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
         body {
             background-color: #030712;
             color: #f1f5f9;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
             overflow-x: hidden;
         }
 
-        /* 浮遊パーティクル用 Canvas */
         #bg-canvas {
             position: fixed;
             top: 0;
@@ -74,30 +74,27 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
             z-index: 0;
         }
 
-        /* 超高精細サイバーグリッド */
         .cyber-grid {
             position: fixed;
             inset: 0;
             background-image: 
                 linear-gradient(to right, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
                 linear-gradient(to bottom, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
-            background-size: 32px 32px;
+            background-size: 36px 36px;
             pointer-events: none;
             z-index: 1;
         }
 
-        /* グラスカードとネオン境界線 */
         .cyber-glass {
-            background: rgba(11, 19, 38, 0.75);
-            border: 1px solid rgba(56, 189, 248, 0.25);
+            background: rgba(11, 19, 38, 0.78);
+            border: 1px solid rgba(56, 189, 248, 0.28);
             backdrop-filter: blur(20px);
             border-radius: 1.25rem;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 25px rgba(56, 189, 248, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 25px rgba(56, 189, 248, 0.09);
             position: relative;
             overflow: hidden;
         }
 
-        /* カード上部の走査レーザー光 */
         .cyber-glass::before {
             content: '';
             position: absolute;
@@ -114,21 +111,15 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
             100% { left: 100%; }
         }
 
-        /* ヘキサゴン・アバタークリップ */
-        .clip-hex {
-            clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+        @keyframes pulse-dot {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            50% { transform: scale(1.15); opacity: 1; filter: drop-shadow(0 0 6px #10b981); }
+            100% { transform: scale(0.9); opacity: 0.7; }
+        }
+        .pulse-live {
+            animation: pulse-dot 2s infinite ease-in-out;
         }
 
-        /* 回転するアバタースキャナーリング */
-        @keyframes rotate-ring {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .scanner-ring {
-            animation: rotate-ring 12s linear infinite;
-        }
-
-        /* ターミナル風スクロールテキスト */
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
         }
@@ -140,6 +131,7 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 relative">
 
+    <!-- 背景：動的宇宙パーティクル ＆ グリッド -->
     <canvas id="bg-canvas"></canvas>
     <div class="cyber-grid"></div>
 
@@ -149,27 +141,25 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
         <div class="cyber-glass p-6 sm:p-7">
             <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                 
-                <!-- ヘキサゴン・アバターHUD -->
-                <div class="relative flex items-center justify-center">
-                    <div class="w-28 h-28 absolute border border-cyan-500/40 rounded-full border-dashed scanner-ring"></div>
-                    <div class="w-24 h-24 clip-hex bg-cyan-400 p-[2px] shadow-[0_0_20px_rgba(56,189,248,0.4)]">
-                        <div class="w-full h-full clip-hex bg-slate-950 overflow-hidden flex items-center justify-center">
-                            <img src="<?php echo htmlspecialchars($PROFILE['avatar_url']); ?>" 
-                                 alt="Avatar" 
-                                 class="w-full h-full object-cover"
-                                 onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
-                        </div>
+                <!-- アバター（元のスクエア角丸＋ネオン枠に戻しました） -->
+                <div class="relative group">
+                    <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-cyan-400 p-1 bg-slate-950 shadow-[0_0_20px_rgba(56,189,248,0.35)]">
+                        <img src="<?php echo htmlspecialchars($PROFILE['avatar_url']); ?>" 
+                             alt="Avatar" 
+                             class="w-full h-full object-cover rounded-xl"
+                             onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
                     </div>
-                    <div class="absolute -bottom-1 bg-emerald-500 text-slate-950 font-black text-[9px] px-2 py-0.5 rounded-full border border-slate-900 shadow">
-                        ONLINE
-                    </div>
+                    <span class="absolute -bottom-2 -right-2 flex items-center gap-1 bg-slate-900 border border-emerald-500/60 px-2 py-0.5 rounded-full shadow-lg">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-live"></span>
+                        <span class="text-[10px] font-bold text-emerald-400">ONLINE</span>
+                    </span>
                 </div>
 
-                <!-- プロファイル基本情報 -->
+                <!-- プロファイル情報 -->
                 <div class="flex-1 text-center sm:text-left space-y-2.5">
                     <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                         <span class="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-950/90 text-emerald-400 border border-emerald-500/40 flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-live"></span>
                             <?php echo htmlspecialchars($PROFILE['status_badge']); ?>
                         </span>
                         <span class="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-cyan-950/90 text-cyan-300 border border-cyan-500/40 shadow-[0_0_10px_rgba(56,189,248,0.2)]">
@@ -189,10 +179,10 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
             </div>
         </div>
 
-        <!-- コアダッシュボード：レーダー ＆ テレメトリ -->
+        <!-- コアダッシュボード -->
         <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
             
-            <!-- レーダーチャート（横幅を広めに確保して文字欠けを完全防止） -->
+            <!-- レーダーチャート -->
             <div class="cyber-glass p-5 md:col-span-6 flex flex-col items-center justify-between">
                 <div class="w-full flex justify-between items-center mb-1">
                     <h2 class="text-cyan-400 font-bold text-xs uppercase flex items-center gap-2">
@@ -212,7 +202,7 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
                 </div>
             </div>
 
-            <!-- 右側：テレメトリ ＆ ライブCLIログ -->
+            <!-- テレメトリ ＆ ライブCLIログ -->
             <div class="cyber-glass p-5 md:col-span-6 flex flex-col justify-between space-y-4">
                 <div>
                     <div class="flex justify-between items-center mb-3">
@@ -221,7 +211,7 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
                             Runtime Telemetry
                         </h2>
                         <span class="text-[10px] text-emerald-400 font-bold tracking-widest flex items-center gap-1.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> LIVE
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-live"></span> LIVE
                         </span>
                     </div>
 
@@ -249,7 +239,7 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
                     </div>
                 </div>
 
-                <!-- ターミナル風ライブログ（SFギミック） -->
+                <!-- ターミナル風ライブログ -->
                 <div>
                     <div class="text-[10px] text-slate-500 mb-1 flex items-center justify-between">
                         <span>SYSTEM EVENT MONITOR</span>
@@ -268,51 +258,79 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
 
     </div>
 
-    <!-- 演出スクリプト群 -->
     <script>
-        // 1. 動的背景パーティクルネットワーク（浮遊するデジタルノード）
+        // 1. 高密度・高速・インタラクティブ宇宙パーティクル
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let width, height, particles = [];
+        let mouse = { x: null, y: null, radius: 120 };
 
         function resize() {
             width = canvas.width = window.innerWidth;
             height = canvas.height = window.innerHeight;
         }
         window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+        window.addEventListener('mouseout', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
         resize();
 
-        for (let i = 0; i < 45; i++) {
+        // 粒子数を 80 個に増加、スピードもアップ
+        for (let i = 0; i < 80; i++) {
             particles.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
-                vx: (Math.random() - 0.5) * 0.4,
-                vy: (Math.random() - 0.5) * 0.4,
-                r: Math.random() * 1.5 + 1
+                vx: (Math.random() - 0.5) * 1.2,
+                vy: (Math.random() - 0.5) * 1.2,
+                r: Math.random() * 2 + 0.8,
+                baseX: 0,
+                baseY: 0
             });
         }
 
         function drawParticles() {
             ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
 
             for (let i = 0; i < particles.length; i++) {
                 let p = particles[i];
                 p.x += p.vx;
                 p.y += p.vy;
 
+                // 画面端の反射
                 if (p.x < 0 || p.x > width) p.vx *= -1;
                 if (p.y < 0 || p.y > height) p.vy *= -1;
 
+                // マウスインタラクション（近づくとふわっと散る）
+                if (mouse.x !== null) {
+                    let dx = mouse.x - p.x;
+                    let dy = mouse.y - p.y;
+                    let distance = Math.hypot(dx, dy);
+                    if (distance < mouse.radius) {
+                        let force = (mouse.radius - distance) / mouse.radius;
+                        p.x -= (dx / distance) * force * 3;
+                        p.y -= (dy / distance) * force * 3;
+                    }
+                }
+
+                // 粒子の描画
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.6)';
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
                 ctx.fill();
 
+                // 粒子同士のリンク描画
                 for (let j = i + 1; j < particles.length; j++) {
                     let p2 = particles[j];
                     let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                    if (dist < 130) {
+                    if (dist < 110) {
+                        let opacity = (1 - dist / 110) * 0.25;
+                        ctx.strokeStyle = `rgba(56, 189, 248, ${opacity})`;
+                        ctx.lineWidth = 1;
                         ctx.beginPath();
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(p2.x, p2.y);
@@ -324,7 +342,7 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
         }
         drawParticles();
 
-        // 2. レーダーチャート（フォント縮小＆レイアウト最適化で欠けをゼロに）
+        // 2. レーダーチャート
         const rCtx = document.getElementById('radarChart').getContext('2d');
         new Chart(rCtx, {
             type: 'radar',
@@ -332,7 +350,7 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
                 labels: <?php echo $chart_labels; ?>,
                 datasets: [{
                     data: <?php echo $chart_values; ?>,
-                    backgroundColor: 'rgba(56, 189, 248, 0.22)',
+                    backgroundColor: 'rgba(56, 189, 248, 0.25)',
                     borderColor: '#38bdf8',
                     borderWidth: 2,
                     pointBackgroundColor: '#38bdf8',
@@ -370,7 +388,7 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
             }
         });
 
-        // 3. タイマー & 疑似ログストリーミング
+        // 3. タイマー & ログストリーミング
         let sec = 0;
         const timer = document.getElementById('session-counter');
         const cli = document.getElementById('cli-box');
@@ -380,7 +398,8 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
             '<span class="text-cyan-400">[INFO]</span> Container memory usage: 142MB / 512MB.',
             '<span class="text-emerald-400">[OK]</span> RDS MySQL connection pool stable.',
             '<span class="text-indigo-400">[NET]</span> TLS handshake verified via ALB.',
-            '<span class="text-amber-400">[HEARTBEAT]</span> Health check ping received.'
+            '<span class="text-amber-400">[HEARTBEAT]</span> Health check ping received.',
+            '<span class="text-purple-400">[STORAGE]</span> EFS volume mount latency: 1.4ms.'
         ];
 
         setInterval(() => {
@@ -390,8 +409,7 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
             const s = String(sec % 60).padStart(2, '0');
             timer.textContent = `${h}:${m}:${s}`;
 
-            // 5秒ごとにログが1行流れる
-            if (sec % 5 === 0) {
+            if (sec % 4 === 0) {
                 const log = sampleLogs[Math.floor(Math.random() * sampleLogs.length)];
                 const line = document.createElement('div');
                 line.innerHTML = log;
