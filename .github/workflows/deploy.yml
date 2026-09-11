@@ -15,6 +15,7 @@ env:
   ECS_CLUSTER: dev-aws-study-cluster
   ECS_TASK_DEFINITION: dev-aws-study-task
   CONTAINER_NAME: wordpress
+  ACTIONS_STEP_DEBUG: true
 
 permissions:
   id-token: write # AWS OIDC 認証に必須
@@ -29,7 +30,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # AWS認証（アクセスキー不要のOIDC認証）
+      # AWS 認証（アクセスキー不要の OIDC 認証）
       - name: Configure AWS Credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -38,12 +39,12 @@ jobs:
           audience: sts.amazonaws.com
           role-skip-session-tagging: true
 
-      # Amazon ECRへのログイン
+      # Amazon ECR へのログイン
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # DockerイメージのビルドとECRへのpush
+      # Docker イメージのビルドと ECR への push
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
@@ -55,7 +56,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      # 最新のECSタスク定義を取得
+      # 最新の ECS タスク定義を取得
       - name: Download Task Definition
         run: |
           aws ecs describe-task-definition --task-definition ${{ env.ECS_TASK_DEFINITION }} --query taskDefinition > task-definition.json
@@ -69,7 +70,7 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
 
-      # ECSサービスへローリングデプロイ
+      # ECS サービスへローリングデプロイ
       - name: Deploy to Amazon ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:

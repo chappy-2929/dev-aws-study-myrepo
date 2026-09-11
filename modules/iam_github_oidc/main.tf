@@ -1,5 +1,5 @@
-# GitHub OIDC プロバイダー
-# GitHub公式推奨のルート証明書サムプリントを指定
+# modules/iam_github_oidc/main.tf
+
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
@@ -13,7 +13,6 @@ resource "aws_iam_openid_connect_provider" "github" {
   }
 }
 
-# GitHub Actionsが一時的に引き受けるIAMロール
 resource "aws_iam_role" "github_actions" {
   name = var.role_name
 
@@ -25,16 +24,13 @@ resource "aws_iam_role" "github_actions" {
         Principal = {
           Federated = aws_iam_openid_connect_provider.github.arn
         }
-        Action = [
-          "sts:AssumeRoleWithWebIdentity",
-          "sts:TagSession"
-        ]
+        Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:*"
+            "token.actions.githubusercontent.com:sub" = "repo:chappy-2929/dev-aws-study-myrepo:*"
           }
         }
       }
@@ -42,7 +38,6 @@ resource "aws_iam_role" "github_actions" {
   })
 }
 
-# ECRへのpushとECSサービスの更新を許可するポリシー
 resource "aws_iam_policy" "deploy_policy" {
   name        = "${var.role_name}-policy"
   description = "Policy for GitHub Actions to push images to ECR and update ECS"
@@ -50,13 +45,11 @@ resource "aws_iam_policy" "deploy_policy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      # ECRログイン認証トークンの取得
       {
         Effect   = "Allow"
         Action   = "ecr:GetAuthorizationToken"
         Resource = "*"
       },
-      # 対象ECRリポジトリへのpush権限
       {
         Effect = "Allow"
         Action = [
@@ -68,7 +61,6 @@ resource "aws_iam_policy" "deploy_policy" {
         ]
         Resource = var.ecr_repository_arn
       },
-      # ECSタスク定義の登録・サービス更新権限
       {
         Effect = "Allow"
         Action = [
@@ -79,7 +71,6 @@ resource "aws_iam_policy" "deploy_policy" {
         ]
         Resource = "*"
       },
-      # タスク実行ロールへのpass権限（タスク定義更新に必要）
       {
         Effect = "Allow"
         Action = [
