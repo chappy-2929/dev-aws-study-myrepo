@@ -164,30 +164,17 @@ resource "aws_iam_policy" "codepipeline" {
         Action   = ["codebuild:BatchGetBuilds", "codebuild:StartBuild"]
         Resource = aws_codebuild_project.main.arn
       },
+      # ECS 全操作を許可してデプロイ時の権限不足を解消
       {
         Effect   = "Allow"
-        Action   = [
-          "ecs:DescribeServices",
-          "ecs:DescribeTaskDefinition",
-          "ecs:DescribeTasks",
-          "ecs:ListTasks",
-          "ecs:RegisterTaskDefinition",
-          "ecs:UpdateService",
-          "ecs:CreateTaskSet",
-          "ecs:DeleteTaskSet",
-          "ecs:UpdateServicePrimaryTaskSet"
-        ]
+        Action   = ["ecs:*"]
         Resource = "*"
       },
+      # Condition を外してタスク実行ロールおよびタスクロールへの PassRole を確実に許可
       {
         Effect   = "Allow"
-        Action   = "iam:PassRole"
+        Action   = ["iam:PassRole"]
         Resource = "*"
-        Condition = {
-          StringLike = {
-            "iam:PassedToService" = "ecs-tasks.amazonaws.com"
-          }
-        }
       }
     ]
   })
@@ -228,7 +215,7 @@ resource "aws_codepipeline" "main" {
         ConnectionArn    = aws_codestarconnections_connection.github.arn
         FullRepositoryId = var.github_repository_id
         BranchName       = var.github_branch
-        DetectChanges    = "true" # Git Push検知による自動トリガーを有効化
+        DetectChanges    = "true"
       }
     }
   }
