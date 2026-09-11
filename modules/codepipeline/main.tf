@@ -125,7 +125,7 @@ resource "aws_codebuild_project" "main" {
   }
 }
 
-# CodePipeline 用 IAM ロール & ポリシー
+# CodePipeline 用 IAM ロール & ポリシー（ECS権限・PassRoleを修正）
 resource "aws_iam_role" "codepipeline" {
   name = "${var.name_prefix}-role-codepipeline"
 
@@ -172,14 +172,22 @@ resource "aws_iam_policy" "codepipeline" {
           "ecs:DescribeTasks",
           "ecs:ListTasks",
           "ecs:RegisterTaskDefinition",
-          "ecs:UpdateService"
+          "ecs:UpdateService",
+          "ecs:CreateTaskSet",
+          "ecs:DeleteTaskSet",
+          "ecs:UpdateServicePrimaryTaskSet"
         ]
         Resource = "*"
       },
       {
         Effect   = "Allow"
         Action   = "iam:PassRole"
-        Resource = "arn:aws:iam::*:role/*"
+        Resource = "*"
+        Condition = {
+          StringLike = {
+            "iam:PassedToService" = "ecs-tasks.amazonaws.com"
+          }
+        }
       }
     ]
   })
