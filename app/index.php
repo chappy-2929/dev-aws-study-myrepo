@@ -1,5 +1,16 @@
 <?php
 // ==============================================================================
+// 1. ALB ヘルスチェック専用応答（最優先で実行）
+// ==============================================================================
+$uri = $_SERVER['REQUEST_URI'] ?? '';
+if (strpos($uri, 'status.php') !== false) {
+    http_response_code(200);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "OK";
+    exit;
+}
+
+// ==============================================================================
 // 🎮 参加者カスタマイズ領域（ここを自由に変更してください）
 // ==============================================================================
 $PROFILE = [
@@ -8,7 +19,7 @@ $PROFILE = [
     'badge_role'   => 'Cloud Infrastructure Engineer',
     'status_badge' => 'SYSTEM ONLINE',
     
-    // アバター画像URL（GitHubのアイコンや、Unsplash、任意の画像URLを指定可能）
+    // アバター画像URL
     'avatar_url'   => 'https://github.com/chappy-2929.png',
     
     // 自己紹介 / 達成コメント
@@ -21,20 +32,13 @@ $PROFILE = [
         'Docker / Container' => 80,
         'CI/CD Pipeline'     => 95,
         'Security & IAM'     => 90,
-        'Troubleshooting'    => 100, // 泥臭い切り分け突破力！
+        'Troubleshooting'    => 100,
     ],
     
     // ランタイム表示テキスト
     'environment'  => 'AWS ECS Fargate (ap-northeast-1)',
     'db_engine'    => 'Amazon Aurora / RDS MySQL',
 ];
-
-// ヘルスチェック用（ALBからのステータス確認に対して200 OKを返却）
-if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], 'status.php') !== false) {
-    http_response_code(200);
-    echo "OK";
-    exit;
-}
 
 $chart_labels = json_encode(array_keys($PROFILE['parameters']), JSON_UNESCAPED_UNICODE);
 $chart_values = json_encode(array_values($PROFILE['parameters']));
@@ -44,7 +48,7 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($PROFILE['player_name']) ?> | Cloud Architect Status</title>
+    <title><?php echo htmlspecialchars($PROFILE['player_name']); ?> | Cloud Architect Status</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
@@ -76,7 +80,7 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
                 <!-- Avatar Image -->
                 <div class="relative group">
                     <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-cyan-400 p-1 bg-slate-900 shadow-lg">
-                        <img src="<?= htmlspecialchars($PROFILE['avatar_url']) ?>" 
+                        <img src="<?php echo htmlspecialchars($PROFILE['avatar_url']); ?>" 
                              alt="Avatar" 
                              class="w-full h-full object-cover rounded-xl"
                              onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=fallback'">
@@ -90,19 +94,19 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
                 <div class="flex-1 text-center sm:text-left space-y-2">
                     <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                         <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950 text-emerald-400 border border-emerald-500/30">
-                            <?= htmlspecialchars($PROFILE['status_badge']) ?>
+                            <?php echo htmlspecialchars($PROFILE['status_badge']); ?>
                         </span>
                         <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cyan-950 text-cyan-400 border border-cyan-500/30">
-                            <?= htmlspecialchars($PROFILE['badge_role']) ?>
+                            <?php echo htmlspecialchars($PROFILE['badge_role']); ?>
                         </span>
                     </div>
 
                     <h1 class="text-3xl font-extrabold tracking-tight text-white">
-                        <?= htmlspecialchars($PROFILE['player_name']) ?>
+                        <?php echo htmlspecialchars($PROFILE['player_name']); ?>
                     </h1>
 
                     <p class="text-slate-400 text-sm leading-relaxed whitespace-pre-line">
-<?= htmlspecialchars($PROFILE['bio']) ?>
+<?php echo htmlspecialchars($PROFILE['bio']); ?>
                     </p>
                 </div>
             </div>
@@ -129,11 +133,11 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
                     <div class="space-y-3">
                         <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 flex justify-between items-center">
                             <span class="text-xs text-slate-400">Compute Platform</span>
-                            <span class="text-xs font-mono text-emerald-400"><?= htmlspecialchars($PROFILE['environment']) ?></span>
+                            <span class="text-xs font-mono text-emerald-400"><?php echo htmlspecialchars($PROFILE['environment']); ?></span>
                         </div>
                         <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 flex justify-between items-center">
                             <span class="text-xs text-slate-400">Database Engine</span>
-                            <span class="text-xs font-mono text-cyan-400"><?= htmlspecialchars($PROFILE['db_engine']) ?></span>
+                            <span class="text-xs font-mono text-cyan-400"><?php echo htmlspecialchars($PROFILE['db_engine']); ?></span>
                         </div>
                         <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 flex justify-between items-center">
                             <span class="text-xs text-slate-400">Deployment Pipeline</span>
@@ -159,8 +163,8 @@ $chart_values = json_encode(array_values($PROFILE['parameters']));
     <!-- Chart Configuration Script -->
     <script>
         const ctx = document.getElementById('radarChart').getContext('2d');
-        const radarLabels = <?= $chart_labels ?>;
-        const radarValues = <?= $chart_values ?>;
+        const radarLabels = <?php echo $chart_labels; ?>;
+        const radarValues = <?php echo $chart_values; ?>;
 
         new Chart(ctx, {
             type: 'radar',
