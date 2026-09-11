@@ -1,5 +1,4 @@
-# modules/iam_github_oidc/main.tf
-
+# GitHub OIDC プロバイダー
 resource "aws_iam_openid_connect_provider" "github" {
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
@@ -13,6 +12,7 @@ resource "aws_iam_openid_connect_provider" "github" {
   }
 }
 
+# GitHub Actions が一時的に引き受ける IAM ロール
 resource "aws_iam_role" "github_actions" {
   name = var.role_name
 
@@ -24,13 +24,16 @@ resource "aws_iam_role" "github_actions" {
         Principal = {
           Federated = aws_iam_openid_connect_provider.github.arn
         }
-        Action = "sts:AssumeRoleWithWebIdentity"
+        Action = [
+          "sts:AssumeRoleWithWebIdentity",
+          "sts:TagSession"
+        ]
         Condition = {
           StringEquals = {
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:chappy-2929/dev-aws-study-myrepo:*"
+            "token.actions.githubusercontent.com:sub" = "repo:chappy-2929@263518867/dev-aws-study-myrepo@1364807936:*"
           }
         }
       }
@@ -38,6 +41,7 @@ resource "aws_iam_role" "github_actions" {
   })
 }
 
+# ECR への push と ECS サービスの更新を許可するポリシー
 resource "aws_iam_policy" "deploy_policy" {
   name        = "${var.role_name}-policy"
   description = "Policy for GitHub Actions to push images to ECR and update ECS"
@@ -45,11 +49,13 @@ resource "aws_iam_policy" "deploy_policy" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      # ECR ログイン認証トークンの取得
       {
         Effect   = "Allow"
         Action   = "ecr:GetAuthorizationToken"
         Resource = "*"
       },
+      # 対象 ECR リポジトリへの push 権限
       {
         Effect = "Allow"
         Action = [
@@ -61,6 +67,7 @@ resource "aws_iam_policy" "deploy_policy" {
         ]
         Resource = var.ecr_repository_arn
       },
+      # ECS タスク定義の登録・サービス更新権限
       {
         Effect = "Allow"
         Action = [
@@ -71,12 +78,13 @@ resource "aws_iam_policy" "deploy_policy" {
         ]
         Resource = "*"
       },
+      # タスクロールおよびタスク実行ロールへの pass 権限
       {
         Effect = "Allow"
         Action = [
           "iam:PassRole"
         ]
-        Resource = "arn:aws:iam::*:role/*-role-ecs-task-*"
+        Resource = "arn:aws:iam::*:role/*ecs-task*"
       }
     ]
   })
