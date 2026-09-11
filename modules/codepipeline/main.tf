@@ -125,7 +125,7 @@ resource "aws_codebuild_project" "main" {
   }
 }
 
-# CodePipeline 用 IAM ロール & ポリシー
+# CodePipeline 用IAMロール&ポリシー
 resource "aws_iam_role" "codepipeline" {
   name = "${var.name_prefix}-role-codepipeline"
 
@@ -164,13 +164,13 @@ resource "aws_iam_policy" "codepipeline" {
         Action   = ["codebuild:BatchGetBuilds", "codebuild:StartBuild"]
         Resource = aws_codebuild_project.main.arn
       },
-      # ECS 全操作を許可してデプロイ時の権限不足を解消
+      # ECS全操作を許可してデプロイ時の権限不足を解消
       {
         Effect   = "Allow"
         Action   = ["ecs:*"]
         Resource = "*"
       },
-      # Condition を外してタスク実行ロールおよびタスクロールへの PassRole を確実に許可
+      # Conditionを外してタスク実行ロールおよびタスクロールへの PassRole を確実に許可
       {
         Effect   = "Allow"
         Action   = ["iam:PassRole"]
